@@ -3,7 +3,6 @@ REM ============================================================
 REM  copy_pdfs.bat
 REM  Searches a source directory (and all its subdirectories)
 REM  for PDF files and copies them into a destination directory.
-REM  Generated using Claude.ai
 REM ============================================================
 
 REM SETLOCAL isolates variable changes so they don't leak out
@@ -12,10 +11,10 @@ SETLOCAL
 
 REM ---- CONFIGURATION ------------------------------------------------
 REM Set SOURCE_DIR to the folder you want to search (includes subfolders).
-SET "SOURCE_DIR=C:\path\to\source\directory"
+SET "SOURCE_DIR=C:\Users\a2924658\Zotero\storage"
 
 REM Set DEST_DIR to the folder where matching PDFs should be copied.
-SET "DEST_DIR=C:\path\to\destination\directory"
+SET "DEST_DIR=C:\Users\a2924658\Dropbox\ZoteroPDFs"
 REM ---------------------------------------------------------------------
 
 REM Check that the source directory actually exists before doing anything.
@@ -34,19 +33,36 @@ IF NOT EXIST "%DEST_DIR%" (
 
 REM ---- MAIN COPY OPERATION --------------------------------------------
 REM XCOPY switches used:
-REM   /S  - copy files from subdirectories too (but skips empty folders)
 REM   /I  - assume destination is a directory (avoids a prompt)
 REM   /Y  - suppress overwrite confirmation prompts
 REM   /H  - copy hidden and system files as well
 REM   *.pdf - only match files with the .pdf extension
-XCOPY "%SOURCE_DIR%\*.pdf" "%DEST_DIR%" /S /I /Y /H
+REM   /R loop to walk every subdirectory ourselves and COPY each
+REM   matching file directly into DEST_DIR, ignoring where it came from.
+REM   This "flattens" all PDFs into a single, bottom-level folder.
 
-REM Check the error level XCOPY returned.
-REM 0 means success, anything else indicates a problem (e.g. no files found).
-IF ERRORLEVEL 1 (
-    ECHO No PDF files were found or an error occurred during copying.
+REM Track whether we found anything, so we can report accurately at the end.
+SET FOUND_ANY=0
+ 
+REM FOR /R "%SOURCE_DIR%" %%F IN (*.pdf) recurses into every subdirectory
+REM under SOURCE_DIR and iterates over each file matching *.pdf.
+REM %%F is set to the FULL PATH of each matching PDF in turn.
+FOR /R "%SOURCE_DIR%" %%F IN (*.pdf) DO (
+    SET FOUND_ANY=1
+    REM /Y suppresses the "overwrite?" prompt if a same-named file already
+    REM exists in DEST_DIR (e.g. two different subfolders both had "paper.pdf").
+    REM %%~nxF extracts just the file name + extension (no path) from %%F,
+    REM so the destination copy always lands directly in DEST_DIR itself.
+    COPY /Y "%%F" "%DEST_DIR%\%%~nxF" >NUL
+    ECHO Copied: %%~nxF
+)
+ 
+REM Report whether anything was actually found and copied.
+IF "%FOUND_ANY%"=="0" (
+    ECHO No PDF files were found under "%SOURCE_DIR%".
 ) ELSE (
-    ECHO PDF files copied successfully to "%DEST_DIR%".
+    ECHO.
+    ECHO All PDF files copied successfully into "%DEST_DIR%" ^(flattened, no subfolders^).
 )
 
 :END
