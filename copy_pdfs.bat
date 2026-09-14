@@ -11,10 +11,10 @@ SETLOCAL
 
 REM ---- CONFIGURATION ------------------------------------------------
 REM Set SOURCE_DIR to the folder you want to search (includes subfolders).
-SET "SOURCE_DIR=C:\Users\a2924658\Zotero\storage"
+SET "SOURCE_DIR=C:\Users\<your-username>\Zotero\storage"
 
 REM Set DEST_DIR to the folder where matching PDFs should be copied.
-SET "DEST_DIR=C:\Users\a2924658\Dropbox\ZoteroPDFs"
+SET "DEST_DIR=C:\Users\<your-username>\Dropbox\ZoteroPDFs"
 REM ---------------------------------------------------------------------
 
 REM Check that the source directory actually exists before doing anything.
